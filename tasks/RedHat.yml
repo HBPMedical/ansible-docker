@@ -2,6 +2,40 @@
 - name: Install Docker Repository
   template: src=docker-repo.j2 dest=/etc/yum.repos.d/docker.repo
 
-- name: Install Docker Engine
-  yum: name=docker-engine state=present
+- name: (yum) Install SELinux python bindings
+  yum: name=libselinux-python state=present
+  when: ansible_selinux is defined and ansible_pkg_mgr == 'yum'
 
+# Workaround for https://github.com/CiscoCloud/mantl/issues/161
+- name: (yum) install latest device-mapper-libs
+  become: yes
+  yum:
+    name: device-mapper-libs
+    state: latest
+  when: ansible_pkg_mgr == 'yum'
+  tags:
+    - docker
+    - bootstrap
+
+- name: (yum) Install Docker Engine
+  yum: name={{ docker_yum_package }} state=present
+  when: ansible_pkg_mgr == 'yum'
+
+- name: (dnf) Install SELinux python bindings
+  dnf: name=libselinux-python state=present
+  when: ansible_selinux is defined and ansible_pkg_mgr == 'dnf'
+
+# Workaround for https://github.com/CiscoCloud/mantl/issues/161
+- name: (dnf) install latest device-mapper-libs
+  become: yes
+  dnf:
+    name: device-mapper-libs
+    state: latest
+  when: ansible_pkg_mgr == 'dnf'
+  tags:
+    - docker
+    - bootstrap
+
+- name: (dnf) Install Docker Engine
+  dnf: name=docker-engine state=present
+  when: ansible_pkg_mgr == 'dnf'

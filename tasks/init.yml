@@ -22,71 +22,41 @@
     - docker
     - bootstrap
 
-- name: Check if /etc/init exists
-  stat: path=/etc/init/
-  register: etc_init
+- include: upstart-init.yml
+  when: ansible_service_mgr != 'systemd'
 
-- name: Check if systemd exists
-  stat: path=/bin/systemctl
-  register: systemd_check
+- include: systemd-init.yml
+  when: ansible_service_mgr == 'systemd'
 
-- name: Docker upstart default config file
-  template: src=docker-defaults.j2 dest=/etc/default/docker
-  when: etc_init.stat.exists == true and systemd_check.stat.exists == false
-  notify:
-    - restart docker
-
-- name: Docker init file
-  template: src=docker-init.j2 dest=/etc/init/docker.conf
-  when: etc_init.stat.exists == true and systemd_check.stat.exists == false
-  notify:
-    - restart docker
-
-- name: create /etc/sysconfig
+- name: Ensure docker config dir exists
   become: yes
   file:
-    dest: /etc/sysconfig
+    path: /root/.docker
     state: directory
   tags:
     - docker
 
-- name: Docker systemd default config file
-  template: src=docker-sysconfig.j2 dest=/etc/sysconfig/docker
-  when: systemd_check.stat.exists == true
-  notify:
-    - restart docker
-
-- name: Docker systemd file
-  template: src=docker-service.j2 dest=/lib/systemd/system/docker.service backup=yes
-  when: systemd_check.stat.exists == true
-  notify:
-    - reload docker
-    - restart docker
-
-- name: create docker.system.d
+- name: Setup private docker registry credentials
   become: yes
-  file:
-    dest: /etc/systemd/system/docker.service.d
-    state: directory
+  when: do_private_docker_registry
+  template:
+    src: config.json.j2
+    dest: /root/.docker/config.json
   tags:
     - docker
+  register: docker_registry_credentials
 
-- name: create local docker service override
+- name: Add docker registry credentials to /etc/
   become: yes
-  copy:
-    dest: /etc/systemd/system/docker.service.d/local.conf
-    content: |
-      [Service]
-      EnvironmentFile=-/etc/sysconfig/docker
-      ExecStart=
-      ExecStart=/usr/bin/docker daemon -H fd:// $other_arg
-  when: systemd_check.stat.exists == true
-  notify:
-    - reload docker
+  when: do_private_docker_registry and docker_registry_credentials.changed
+  command: tar cvzf /etc/docker.tar.gz .docker
+  args:
+    chdir: /root
   tags:
     - docker
+    - skip_ansible_lint
 
-- name: enable docker
+- name: Enable docker
   become: yes
   service:
     name: docker

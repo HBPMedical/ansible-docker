@@ -1,24 +1,59 @@
 ---
-# RedHat: Docker yum repository URL
-docker_yum_repo: "https://yum.dockerproject.org/repo/main/{{ ansible_distribution | lower }}/{{ os_version_major }}"
-docker_yum_repo_gpg: 'https://yum.dockerproject.org/gpg'
+# Empty version so latest is picked by default. See below.
+# Provide value to install a specific version. For example:
+#  for Debian system, 1.9.0-1
+#  for RedHat system, 1.10
+docker_version:
 
-docker_opts: ''
+# RedHat:
+docker_yum_repo_url: "https://yum.dockerproject.org/repo/main"
+docker_yum_repo: "{{ docker_yum_repo_url }}/{{ docker_yum_repo_uris[ansible_distribution] }}"
+docker_yum_repo_gpg: 'https://yum.dockerproject.org/gpg'
+docker_yum_package: "docker-engine{{ '-' + docker_version|replace('~','.') if docker_version else '' }}"
+
 docker_create_group: true
-docker_service_start_timeout: ''    # use system default value
 
 ##### ---
 # Want to advertise the tcp port? Enable below.
 # To enable tcp you must set :
 #   - `docker_listen_tcp = True`
-#   - uncomment `docker_opts` or provide it as a override
+#   - uncomment `docker_network_options` or provide it as a override
 #
 # Note:
 #   By setting `-H` opt for docker, it will no longer be listening
 #   on the socket. You cannot have both. You must choose socket `-d`
 #   or tcp `-H`.
 #
-docker_listen_tcp: False
+docker_listen_tcp: false
+docker_listen_tcp_tls: "{{ docker_listen_tcp }}"
+docker_listen_address: "{{ ansible_default_ipv4.address }}"
 docker_listen_port: 4243
-# docker_opts: '"-H tcp://{{ansible_eth1.ipv4.address}}:{{docker_listen_port}}"'
-##### ---
+
+do_private_docker_registry: false
+
+# Docker log options: See https://docs.docker.com/engine/admin/logging/overview/
+docker_log_driver: journald
+
+# Docker options
+docker_service_start_timeout: ''    # use system default value
+docker_selinux_enabled: false
+docker_options:
+  - "--dns {{ private_ipv4 }}"
+  - "--log-driver={{ docker_log_driver }}"
+  - "--disable-legacy-registry"
+  - "{% if docker_selinux_enabled %}--selinux-enabled{% endif %}"
+
+
+# Docker network options can be provided as a list
+docker_network_options:
+  - "-H unix:///var/run/docker.sock"
+  - "--icc=false" # disable inter-container networking for security
+  - "{% if docker_listen_tcp %}-H tcp://{{ docker_listen_address }}:{{ docker_listen_port }}{% endif %}"
+  - "{% if docker_listen_tcp and docker_listen_tcp_tls %}--tlsverify{% endif %}"
+  - "{% if docker_listen_tcp and docker_listen_tcp_tls %}--tlscacert=/etc/pki/CA/ca.cert{%- endif %}"
+  - "{% if docker_listen_tcp and docker_listen_tcp_tls %}--tlscert={{ host_cert }}{%- endif %}"
+  - "{% if docker_listen_tcp and docker_listen_tcp_tls %}--tlskey={{ host_key }}{%- endif %}"
+
+# Possible values: overlay (default), devicemapper, btrfs (unsupported)
+# Used with docker-storage-setup
+#docker_storage_driver: overlay

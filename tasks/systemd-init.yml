@@ -1,0 +1,34 @@
+---
+
+- name: Remove old configuration
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - /etc/sysconfig/docker
+    - /etc/systemd/system/docker.service.d/local.conf
+
+- name: Create directory for systemd drop-ins
+  become: yes
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+  tags:
+    - docker
+
+# We have to restart docker when these files have changed, otherwise the updated
+# configuration won't come into effect.
+- name: systemd drop-in for options and ExecStart
+  become: yes
+  template:
+    src:  "{{ item }}.j2"
+    dest: "/etc/systemd/system/docker.service.d/{{ item }}"
+  with_items:
+    - 10-options.conf
+    - 12-network-options.conf
+    - 20-ExecStart.conf
+  notify:
+    - reload docker
+  tags:
+    - docker

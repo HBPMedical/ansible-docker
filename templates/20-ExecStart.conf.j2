@@ -1,0 +1,7 @@
+[Service]
+ExecStart=
+ExecStart=/usr/bin/docker daemon $OPTIONS \
+          $DOCKER_NETWORK_OPTIONS
+{% if docker_service_start_timeout != '' %}
+TimeoutStartSec={{ docker_service_start_timeout }}
+{% endif %}
