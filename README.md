@@ -1,4 +1,4 @@
-ansible-docker - Ansible Playbook for Docker
+ansible-docker - Ansible Role for Docker
 ==============
 
 ## Overview
