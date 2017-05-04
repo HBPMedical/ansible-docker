@@ -1,6 +1,8 @@
 ---
 - name: Add specific key
-  apt_key: id={{docker_repo_key}} keyserver=keyserver.ubuntu.com state=present
+  apt_key:
+    url: "{{ docker_repo_key_url }}"
+    state: present
   register: apt_key_status
 
 - name: Install https apt transport package
@@ -8,7 +10,7 @@
 
 - name: Add docker repo
   apt_repository:
-    repo: "deb {{ docker_repo }} {{ ansible_lsb.id | lower}}-{{ ansible_lsb.codename | lower }} main"
+    repo: "deb [arch=amd64] {{ docker_repo }} {{ ansible_lsb.codename | lower }} main"
     state: present
 
 - name: Install docker-engine package
@@ -19,6 +21,12 @@
     cache_valid_time: 600
   with_items:
     - "docker-engine={{ docker_version }}-{{ docker_package_version }}~{{ ansible_lsb.id | lower }}-{{ ansible_lsb.codename | lower }}"
+
+- name: Hold docker-engine package
+  command: apt-mark hold docker-engine
+  register: result
+  changed_when: "'was already set on hold' not in result.stdout"
+  become: true
 
 # consider separate role here
 - name: Change ufw forward policy to ACCEPT
