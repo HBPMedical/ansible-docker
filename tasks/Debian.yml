@@ -10,7 +10,7 @@
 
 - name: Add docker repo
   apt_repository:
-    repo: "deb [arch=amd64] {{ docker_repo }} {{ ansible_lsb.codename | lower }} main"
+    repo: "deb [arch=amd64] {{ docker_repo }} {{ ansible_lsb.codename | lower }} stable"
     state: present
 
 - name: Remove old docker-engine package
