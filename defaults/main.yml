@@ -6,10 +6,7 @@
 docker_version:
 
 # RedHat:
-docker_yum_repo_url: "https://yum.dockerproject.org/repo/main"
-docker_yum_repo: "{{ docker_yum_repo_url }}/{{ docker_yum_repo_uris[ansible_distribution] }}"
-docker_yum_repo_gpg: 'https://yum.dockerproject.org/gpg'
-docker_yum_package: "docker-engine{{ '-' + docker_version|replace('~','.') if docker_version else '' }}"
+docker_yum_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
 
 docker_create_group: true
 

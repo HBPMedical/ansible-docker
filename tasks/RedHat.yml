@@ -1,6 +1,9 @@
 
-- name: Install Docker Repository
-  template: src=docker-repo.j2 dest=/etc/yum.repos.d/docker.repo
+- name: Add Docker repository
+  command: "yum-config-manager --add-repo {{ docker_yum_repo }}"
+
+- name: Rebuild yum cache
+  command: yum makecache fast
 
 - name: (yum) Install SELinux python bindings
   yum: name=libselinux-python state=present
@@ -37,5 +40,5 @@
     - bootstrap
 
 - name: (dnf) Install Docker Engine
-  dnf: name=docker-engine state=present
+  dnf: name=docker-ce state=present
   when: ansible_pkg_mgr == 'dnf'
