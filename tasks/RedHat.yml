@@ -1,3 +1,14 @@
+---
+
+- name: Check that Yum config manager exists
+  stat: path=/usr/bin/yum-config-manager
+  register: yum_config_manager
+
+- name: Install Yum config manager if required
+  yum:
+    name: yum-utils
+    state: present
+  when: not yum_config_manager.stat.exists
 
 - name: Add Docker repository
   command: "yum-config-manager --add-repo {{ docker_yum_repo }}"
