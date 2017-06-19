@@ -1,9 +1,12 @@
 ---
 # Empty version so latest is picked by default. See below.
 # Provide value to install a specific version. For example:
-#  for Debian system, 1.9.0-1
+#  for Debian system,
+#    docker_version: 17.03.1
+#    docker_package_version: ce-0
 #  for RedHat system, 1.10
 docker_version:
+# docker_package_version
 
 # RedHat:
 docker_yum_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
