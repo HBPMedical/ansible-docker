@@ -23,10 +23,10 @@
     update_cache: yes
     cache_valid_time: 600
   with_items:
-    - "docker-ce={{ docker_version }}~{{ docker_package_version }}~{{ ansible_lsb.id | lower }}-{{ ansible_lsb.codename | lower }}"
+    - "{{ docker_package_name }}={{ docker_version }}~{{ docker_debian_package_version }}~{{ ansible_lsb.id | lower }}-{{ ansible_lsb.codename | lower }}"
 
 - name: Hold docker-ce package
-  command: apt-mark hold docker-ce
+  command: apt-mark hold {{ docker_package_name }}
   register: result
   changed_when: "'was already set on hold' not in result.stdout"
   become: true

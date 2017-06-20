@@ -6,11 +6,13 @@
 #    docker_package_version: ce-0
 #  for RedHat system, 1.10
 docker_version:
-# docker_package_version
+docker_debian_package_version: "ce-0"
+docker_redhat_package_version: "ce"
+docker_package_name: "docker-ce"
 
 # RedHat:
 docker_yum_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
-docker_yum_package: "docker-ce{{ '-' + docker_version|replace('~','.') if docker_version else '' }}"
+docker_yum_package: "{{ docker_package_name }}{{ '-' + docker_version|replace('~','.') + '.' + docker_redhat_package_version if docker_version else '' }}"
 
 docker_create_group: true
 
