@@ -7,6 +7,8 @@
   with_items:
     - /etc/sysconfig/docker
     - /etc/systemd/system/docker.service.d/local.conf
+  notify:
+    - reload docker
 
 - name: Create directory for systemd drop-ins
   become: yes
