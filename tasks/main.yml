@@ -19,12 +19,31 @@
 - include: RedHat.yml
   when: ansible_os_family == "RedHat"
 
-- name: Enable docker
+- name: Start Docker
   become: yes
   service:
     name: docker
     enabled: yes
     state: started
+  tags:
+    - docker
+    - bootstrap # needed to install Docker images during bootstrap
+
+- name: Ensure that Docker has started and keeps running
+  service: name=docker state=started
+  tags:
+    - docker
+    - bootstrap # needed to install Docker images during bootstrap
+  register: docker_running
+  until: docker_running.state == 'started' and not docker_running|changed
+  retries: 2
+  delay: 5
+
+- name: Validate that Docker is running
+  fail:
+    msg: >
+      Service docker has not started as expected, please check its current status or error messages
+  when: docker_running.state != 'started' or docker_running|changed
   tags:
     - docker
     - bootstrap # needed to install Docker images during bootstrap

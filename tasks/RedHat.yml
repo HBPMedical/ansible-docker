@@ -16,6 +16,14 @@
 - name: Rebuild yum cache
   command: yum makecache fast
 
+- name: Remove old Docker packages
+  yum:
+    pkg: "{{ item }}"
+    state: absent
+  with_items:
+    - docker-engine
+    - docker-selinux
+
 - name: (yum) Install SELinux python bindings
   yum: name=libselinux-python state=present
   when: ansible_selinux is defined and ansible_pkg_mgr == 'yum'
