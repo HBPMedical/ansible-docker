@@ -33,7 +33,12 @@
 
 - name: (yum) Install Docker Engine
   yum: name={{ docker_yum_package }} state=present
-  when: ansible_pkg_mgr == 'yum'
+  when: ansible_pkg_mgr == 'yum' and (not docker_version or docker_version|version_compare('17.06', '>='))
+
+- name: (yum) Install Docker Engine - patch for older versions
+  command: >
+    yum install -y --setopt=obsoletes=0 {{ docker_yum_package }} {{ docker_yum_selinux_package }}
+  when: ansible_pkg_mgr == 'yum' and docker_version|version_compare('17.06', '<')
 
 - name: (dnf) Install SELinux python bindings
   dnf: name=libselinux-python state=present

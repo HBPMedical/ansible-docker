@@ -24,6 +24,8 @@ docker_deb_package: "
 # RedHat:
 docker_yum_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
 docker_yum_package: "{{ docker_package_name }}{{ '-' + docker_version|replace('~','.') + '.' + docker_redhat_package_version if docker_version else '' }}"
+docker_selinux_package_name: "docker-ce-selinux"
+docker_yum_selinux_package: "{{ docker_selinux_package_name }}{{ '-' + docker_version|replace('~','.') + '.' + docker_redhat_package_version if docker_version else '' }}"
 
 docker_create_group: true
 
