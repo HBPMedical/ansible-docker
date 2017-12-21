@@ -16,6 +16,12 @@
 - name: Remove old docker-engine package
   apt: pkg=docker-engine state=absent
 
+- name: Unhold docker-ce package
+  command: apt-mark unhold {{ docker_package_name }}
+  register: result
+  changed_when: "'was already not hold' not in result.stdout"
+  become: true
+
 - name: Install docker-ce package
   apt:
     pkg: "{{item}}"
