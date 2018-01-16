@@ -58,7 +58,6 @@ docker_selinux_enabled: false
 docker_options:
   - "--dns {{ private_ipv4 }}"
   - "--log-driver={{ docker_log_driver }}"
-  - "--disable-legacy-registry"
   - "{% if docker_selinux_enabled %}--selinux-enabled{% endif %}"
 
 
