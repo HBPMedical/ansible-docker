@@ -8,15 +8,15 @@
   tags:
     - config
 
-- include: init.yml
+- import_tasks: init.yml
 
 - name: Ensure that the new configuration has been loaded
   meta: flush_handlers
 
-- include: Debian.yml
+- include_tasks: Debian.yml
   when: ansible_os_family == "Debian"
 
-- include: RedHat.yml
+- include_tasks: RedHat.yml
   when: ansible_os_family == "RedHat"
 
 - name: Start Docker
@@ -35,7 +35,7 @@
     - docker
     - bootstrap # needed to install Docker images during bootstrap
   register: docker_running
-  until: docker_running.state == 'started' and not docker_running|changed
+  until: docker_running.state == 'started' and not docker_running is changed
   retries: 2
   delay: 5
 
@@ -43,7 +43,7 @@
   fail:
     msg: >
       Service docker has not started as expected, please check its current status or error messages
-  when: docker_running.state != 'started' or docker_running|changed
+  when: docker_running.state != 'started' or docker_running is changed
   tags:
     - docker
     - bootstrap # needed to install Docker images during bootstrap

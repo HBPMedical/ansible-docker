@@ -14,7 +14,7 @@ docker_package_name: "docker-ce"
 docker_deb_package: "
   {%- if not docker_version -%}
     {{ docker_package_name }}
-  {%- elif docker_version|version_compare('17.05', '<=') -%}
+  {%- elif docker_version is version('17.05', '<=') -%}
     {{ docker_package_name }}={{ docker_version }}~{{ docker_debian_package_version }}~{{ ansible_lsb.id | lower }}-{{ ansible_lsb.codename | lower }}
   {%- else -%}
     {{ docker_package_name }}={{ docker_version }}~{{ docker_debian_package_version }}~{{ ansible_lsb.id | lower }}

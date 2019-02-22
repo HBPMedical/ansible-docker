@@ -22,10 +22,10 @@
     - docker
     - bootstrap
 
-- include: upstart-init.yml
+- include_tasks: upstart-init.yml
   when: ansible_service_mgr != 'systemd'
 
-- include: systemd-init.yml
+- include_tasks: systemd-init.yml
   when: ansible_service_mgr == 'systemd'
 
 - name: Ensure docker config dir exists

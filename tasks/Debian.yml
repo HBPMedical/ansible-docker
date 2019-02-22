@@ -6,7 +6,7 @@
   register: apt_key_status
 
 - name: Install https apt transport package
-  apt: pkg=apt-transport-https state=present update_cache={{ apt_key_status|changed }}
+  apt: pkg=apt-transport-https state=present update_cache={{ apt_key_status is changed }}
 
 - name: Add docker repo
   apt_repository:
